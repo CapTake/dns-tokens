@@ -6,9 +6,6 @@ import minteryContractJson from "../../build/Token.json";
 import achiContractJson from "../../build/Achievements.json";
 import chai, { expect } from "chai";
 import { rejects } from "assert";
-import { MichelsonMapKey } from "@taquito/michelson-encoder";
-
-// jest.setTimeout(50000);
 
 const alice = {
   pkh: "tz1MnmtP4uAcgMpeZN6JtyziXeFqqwQG6yn6",
@@ -26,17 +23,9 @@ const carol = {
     pk: "edpku9qEgcyfNNDK6EpMvu5SqXDqWRLuxdMxdyH12ivTUuB1KXfGP4",
 };
 
-const price = 1;
 const rpcUrl = "https://rpc.ithacanet.teztnets.xyz";
 
 const error_ACCESS_DENIED = "Access denied"
-const error_NOT_STARTED = "11"
-const error_RESERVE_EXHAUSTED = "12"
-const error_NOT_WHITELISTED = "13"
-const error_AMOUNT_TOO_BIG = "14"
-const error_WALLET_ALLOWANCE_EXCEEDED = "15"
-const error_PAUSED = "16"
-const error_INCORRECT_FUNDS_AMOUNT = "17"
 
 let contractAddress = "";
 let TezosAlice;
