@@ -6,6 +6,7 @@ const { migrate } = require("../scripts/helpers")
 const storage = require("../storage/Token")
 const aStorage = require("../storage/Achievements")
 
+const owner = 'tz1ZCRre8PxLkxozRPcUne4C6ZUy4mqa51VC'
 
 module.exports = async (tezos, network) => {
 
@@ -21,7 +22,7 @@ module.exports = async (tezos, network) => {
   })
 
   console.log('Deploing FA2')
-  storage.default.admin = ADMIN
+  storage.default.admin = owner
   const minteryAddress = await migrate(
     tezos,
     "Token",
@@ -29,7 +30,7 @@ module.exports = async (tezos, network) => {
   )
   console.log(`Token: ${minteryAddress}`)
 
-  aStorage.default.admin = ADMIN
+  aStorage.default.admin = owner
   aStorage.default.token = minteryAddress
 
   console.log('Deploing Achievements contract')

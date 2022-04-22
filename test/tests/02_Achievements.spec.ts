@@ -101,7 +101,7 @@ describe("Origination of contract", () => {
       achiAddress = originationOp.contractAddress;
       expect(originationOp.hash).to.be.a('string');
       expect(achiAddress).to.be.a('string');
-      console.log(achiAddress)
+      // console.log(achiAddress)
     } catch (error) {
       console.error(error);
       expect(error).to.be.undefined;
@@ -135,13 +135,29 @@ describe("Tests for minting", () => {
         
         const newStorage = await contract.storage();
         expect(newStorage.last_id.toNumber()).to.equal(1)
-        const tokenmeta = await newStorage.token_metadata.get(0)
-        console.log(tokenmeta)
+        // const tokenmeta = await newStorage.token_metadata.get(0)
+        // console.log(tokenmeta)
     } catch (error) {
-        console.error(error);
+        // console.error(error);
         expect(error).to.be.undefined;
     }})
-
+    it("Should allow Alice to whitelist Achievements contract address", async () => {
+      try {
+        const contract = await TezosAlice.contract.at(contractAddress);
+        const storage = await contract.storage();
+        expect(storage.allowed).to.not.include(achiAddress);
+        const op = await contract.methods
+          .allow_address(achiAddress, true)
+          .send();
+        await op.confirmation(1);
+  
+        const newStorage = await contract.storage();
+        expect(newStorage.allowed).to.include(achiAddress);
+      } catch (error) {
+        console.error(error);
+        expect(error).to.be.undefined;
+      }
+    });
     it("Should allow admin Alice to transfer tokens to Achievements contract", async () => {
         try {
             const contract = await TezosAlice.contract.at(contractAddress);
@@ -262,7 +278,7 @@ describe("Tests for administering", () => {
     })
 })
 describe("Test for token metadata", () => {
-    it("Should allow Bob to update token metadata", async () => {
+    it("Should allow Bob to update Achievement token metadata", async () => {
         try {
             const contract = await TezosBob.contract.at(achiAddress);
             const newStorage = await contract.storage()
