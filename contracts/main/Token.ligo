@@ -7,6 +7,7 @@
     ledger         : big_map (address, nat);
     metadata       : big_map (string, bytes);
     operators      : big_map (owner * address, unit);
+    allowed        : set(address);
     token_metadata : big_map (token_id, token_meta);
  ]
 
@@ -18,6 +19,7 @@ type mint_params is [@layout:comb] record [
 ]
 
 type action is
+  | Allow_address of address * bool
   | Balance_of of balance_of_params
   | Confirm_admin
   | Mint of mint_params
@@ -49,7 +51,7 @@ const error_not_a_pending_admin = "Not a pending admin"
 
           var sender_balance : amt := get_balance(from_, s);
           if sender_balance < tx.amount then failwith(fa2_insufficient_balance) else skip;
-
+          assert_with_error(s.allowed contains from_ or s.allowed contains tx.to_, "TX Disallowed");
           (* transfer only to different address, and not 0 amount, but not fail *)
           if (from_ = tx.to_) or (tx.amount = 0n) then skip else {
             const dest_balance : amt = get_balance(tx.to_, s);
@@ -114,6 +116,11 @@ const error_not_a_pending_admin = "Not a pending admin"
     s.pending_admin := p;
   } with (noop, s)
 
+  function allow_address(const p : address * bool; var s : storage) : return is block {
+    assert_with_error(Tezos.sender = s.admin, error_access_denied);
+    s.allowed := if p.1 then Set.add(p.0, s.allowed) else Set.remove(p.0, s.allowed);
+  } with (noop, s)
+
   function confirm_admin(var s : storage) : return is block {
     assert_with_error(Some(Tezos.sender) = s.pending_admin, error_not_a_pending_admin);
     s.pending_admin := (None: option(address));
@@ -122,6 +129,7 @@ const error_not_a_pending_admin = "Not a pending admin"
 
   function main(const action : action; var s : storage) : return is
     case action of [
+      | Allow_address(p) -> allow_address(p, s)
       | Balance_of(p) -> fa2_balance_of(p, s)
       | Confirm_admin -> confirm_admin(s)
       | Mint(p) -> mint(p, s)

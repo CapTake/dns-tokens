@@ -51,6 +51,7 @@ describe("Origination of contract", () => {
           paused: false,
           ledger: new MichelsonMap(),
           metadata: new MichelsonMap(),
+          allowed: [],
           operators: new MichelsonMap(),
           token_metadata: new MichelsonMap(),
         }
@@ -118,6 +119,44 @@ describe("Tests for minting", () => {
 });
 
 describe("Tests for transfers", () => {
+  it("Should prevent Alice from sending tokens", async () => {
+    const contract = await TezosAlice.contract.at(contractAddress);
+    await rejects(contract.methods
+      .transfer([
+        {
+          from_: alice.pkh,
+          txs: [
+            {
+              to_: bob.pkh,
+              token_id: tokenId,
+              amount: initialTotalSupply / 2
+            }
+          ]
+        }
+      ])
+      .send(), (err: Error) => {
+      expect(err.message).to.equal("TX Disallowed");
+
+      return true;
+    });
+  });
+  it("Should allow Alice to whitelist her address", async () => {
+    try {
+      const contract = await TezosAlice.contract.at(contractAddress);
+      const storage = await contract.storage();
+      expect(storage.allowed).to.not.include(alice.pkh);
+      const op = await contract.methods
+        .allow_address(alice.pkh, true)
+        .send();
+      await op.confirmation(1);
+
+      const newStorage = await contract.storage();
+      expect(newStorage.allowed).to.include(alice.pkh);
+    } catch (error) {
+      console.error(error);
+      expect(error).to.be.undefined;
+    }
+  });
   it("Should allow Alice to transfer tokens to Bob", async () => {
     try {
       const contract = await TezosAlice.contract.at(contractAddress);
@@ -152,6 +191,8 @@ describe("Tests for transfers", () => {
 
   it("Should prevent Alice from sending more than her balance", async () => {
     const contract = await TezosAlice.contract.at(contractAddress);
+    const storage = await contract.storage();
+    const aliceOriginalBalance = await storage.ledger.get(alice.pkh);
     await rejects(contract.methods
       .transfer([
         {
@@ -160,14 +201,13 @@ describe("Tests for transfers", () => {
             {
               to_: bob.pkh,
               token_id: tokenId,
-              amount: initialTotalSupply + 1
+              amount: aliceOriginalBalance.toNumber() + 1
             }
           ]
         }
       ])
       .send(), (err: Error) => {
       expect(err.message).to.equal("FA2_INSUFFICIENT_BALANCE");
-
       return true;
     });
   });

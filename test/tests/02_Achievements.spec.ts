@@ -64,6 +64,7 @@ describe("Origination of contract", () => {
           ledger: MichelsonMap.fromLiteral({
             [alice.pkh]: 1000,
           }),
+          allowed: [],
           metadata: new MichelsonMap(),
           operators: new MichelsonMap(),
           token_metadata: new MichelsonMap(),
@@ -100,7 +101,7 @@ describe("Origination of contract", () => {
       achiAddress = originationOp.contractAddress;
       expect(originationOp.hash).to.be.a('string');
       expect(achiAddress).to.be.a('string');
-      // console.log(achiAddress)
+      console.log(achiAddress)
     } catch (error) {
       console.error(error);
       expect(error).to.be.undefined;

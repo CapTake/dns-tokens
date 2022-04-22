@@ -37,8 +37,7 @@ To deploy the contracts you should run the following command:
   yarn migrate
 ```
 
-By default, the contracts will be deployed to the `development` network (in the
-Docker container).
+By default, the contracts will be deployed to the `development` network.
 
 Also, you can deploy to the `mainnet`
 
