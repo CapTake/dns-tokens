@@ -27,6 +27,7 @@ export default {
     admin: zeroAddress,
     pending_admin: null,
     ledger: new MichelsonMap(),
+    allowed: [],
     metadata,
     operators: new MichelsonMap(),
     token_metadata,
